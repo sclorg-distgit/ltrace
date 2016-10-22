@@ -1,0 +1,29 @@
+From 8fbbcfc92a7ad388334bf162222ddee1a03c9d29 Mon Sep 17 00:00:00 2001
+From: Petr Machata <pmachata@redhat.com>
+Date: Mon, 2 Mar 2015 17:21:36 +0100
+Subject: [PATCH] Also muffle warnings about weird file types referenced by
+ environment
+
+---
+ options.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/options.c b/options.c
+index 61d1633..e602848 100644
+--- a/options.c
++++ b/options.c
+@@ -505,8 +505,9 @@ opt_F_get_kind(struct opt_F_t *entry)
+ 		} else if (S_ISREG(st.st_mode) || S_ISLNK(st.st_mode)) {
+ 			entry->kind = OPT_F_FILE;
+ 		} else {
+-			fprintf(stderr, "%s is neither a regular file, "
+-				"nor a directory.\n", entry->pathname);
++			if (entry->origin == OPT_F_CMDLINE)
++				fprintf(stderr, "%s is neither a regular file, "
++					"nor a directory.\n", entry->pathname);
+ 			entry->kind = OPT_F_BROKEN;
+ 		}
+ 	}
+-- 
+2.1.0
+
