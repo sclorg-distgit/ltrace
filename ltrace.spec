@@ -3,7 +3,7 @@
 Summary: Tracks runtime library calls from dynamically linked executables
 Name: %{?scl_prefix}ltrace
 Version: 0.7.91
-Release: 15%{?dist}
+Release: 16%{?dist}
 URL: http://ltrace.alioth.debian.org/
 License: GPLv2+
 Group: Development/Debuggers
@@ -110,6 +110,8 @@ Patch201: ltrace-0.7.91-XDG_CONFIG_DIRS-2.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=1196702
 Patch202: ltrace-0.7.91-testsuite-system_call_params.patch
 Patch203: ltrace-0.7.91-testsuite-system_call_params-2.patch
+
+Patch204: ltrace-0.7.91-rh1391820.patch
  
 %description
 Ltrace is a debugging program which runs a specified command until the
@@ -153,10 +155,11 @@ execution of processes.
 %patch201 -p1
 %patch202 -p1
 %patch203 -p1
+%patch204 -p1
 
 %build
 autoreconf -i
-%configure --docdir=%{?_pkgdocdir}%{!?_pkgdocdir:%{_docdir}/%{name}-%{version}}
+%configure
 make %{?_smp_mflags}
 
 %install
@@ -171,13 +174,17 @@ echo ====================TESTING END=====================
 
 %files
 %defattr(-,root,root)
-%doc NEWS
+%doc NEWS COPYING CREDITS INSTALL README TODO
 %{_bindir}/ltrace
 %{_mandir}/man1/ltrace.1*
 %{_mandir}/man5/ltrace.conf.5*
 %{_datadir}/ltrace
 
 %changelog
+* Thu Jan 19 2017 DJ Delorie <dj@redhat.com> - 0.7.91-16
+- Move README et al install to spec file, so that paths
+  are more consistent.
+
 * Thu Jul 21 2016 DJ Delorie <dj@redhat.com> - 0.7.91-15
                   Jeff Law <law@redhat.com>
 - Pull in fc24 patches
