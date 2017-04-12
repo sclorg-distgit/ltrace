@@ -3,7 +3,7 @@
 Summary: Tracks runtime library calls from dynamically linked executables
 Name: %{?scl_prefix}ltrace
 Version: 0.7.91
-Release: 12%{?dist}
+Release: 13%{?dist}
 URL: http://ltrace.alioth.debian.org/
 License: GPLv2+
 Group: Development/Debuggers
@@ -176,6 +176,10 @@ echo ====================TESTING END=====================
 %{_datadir}/ltrace
 
 %changelog
+* Tue Mar  7 2017 DJ Delorie <dj@redhat.com> - 0.7.91-13
+- Remove mentions of (and one attempt to patch) backup files in 
+  ltrace-0.7.91-unwind-elfutils.patch (#1427140)
+
 * Fri Jul 17 2015 DJ Delorie <dj@redhat.com> - 0.7.91-12
 - Pull in fc23 patches
 

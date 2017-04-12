@@ -91,7 +91,6 @@ diff -u ltrace-0.7.91/ltrace.1 ltrace-0.7.91-pm/ltrace.1
  .IP "\-x \fIfilter"
  A qualifying expression which modifies which symbol table entry points
  to trace.  The format of the filter expression is described in the
-Only in ltrace-0.7.91-pm/: ltrace.1.orig
 diff -u ltrace-0.7.91/Makefile.am ltrace-0.7.91-pm/Makefile.am
 --- ltrace-0.7.91/Makefile.am	2015-01-09 00:38:17.965190955 +0100
 +++ ltrace-0.7.91-pm/Makefile.am	2015-01-09 00:37:40.260910568 +0100
@@ -165,7 +164,6 @@ diff -u ltrace-0.7.91/options.c ltrace-0.7.91-pm/options.c
  
  		case 'x':
  			parse_filter_chain(optarg, &options.static_filter);
-Only in ltrace-0.7.91-pm/: options.c.orig
 diff -u ltrace-0.7.91/options.h ltrace-0.7.91-pm/options.h
 --- ltrace-0.7.91/options.h	2015-01-09 00:38:17.966190936 +0100
 +++ ltrace-0.7.91-pm/options.h	2015-01-09 00:37:40.261910548 +0100
@@ -291,7 +289,6 @@ diff -u ltrace-0.7.91/output.c ltrace-0.7.91-pm/output.c
  	current_proc = NULL;
  	current_column = 0;
  }
-Only in ltrace-0.7.91-pm/: output.c.orig
 diff -u ltrace-0.7.91/proc.c ltrace-0.7.91-pm/proc.c
 --- ltrace-0.7.91/proc.c	2015-01-09 00:38:17.981190650 +0100
 +++ ltrace-0.7.91-pm/proc.c	2015-01-09 00:37:40.261910548 +0100
@@ -378,24 +375,6 @@ diff -u ltrace-0.7.91/proc.c ltrace-0.7.91-pm/proc.c
  	/* Insert breakpoints for all active (non-latent) symbols.  */
  	struct library_symbol *libsym = NULL;
  	while ((libsym = library_each_symbol(lib, libsym,
-diff -u ltrace-0.7.91/proc.c.orig ltrace-0.7.91-pm/proc.c.orig
---- ltrace-0.7.91/proc.c.orig	2013-10-23 01:01:15.000000000 +0200
-+++ ltrace-0.7.91-pm/proc.c.orig	2015-01-09 00:37:24.120218624 +0100
-@@ -220,9 +220,11 @@
- 		goto fail;
- 	}
- 
--	if (proc->leader != proc)
--		return 0;
--	if (process_init_main(proc) < 0) {
-+	if (proc->leader != proc) {
-+		proc->e_machine = proc->leader->e_machine;
-+		proc->e_class = proc->leader->e_class;
-+		get_arch_dep(proc);
-+	} else if (process_init_main(proc) < 0) {
- 		process_bare_destroy(proc, 0);
- 		goto fail;
- 	}
 diff -u ltrace-0.7.91/proc.h ltrace-0.7.91-pm/proc.h
 --- ltrace-0.7.91/proc.h	2015-01-09 00:38:17.966190936 +0100
 +++ ltrace-0.7.91-pm/proc.h	2015-01-09 00:37:40.261910548 +0100
@@ -422,7 +401,6 @@ diff -u ltrace-0.7.91/proc.h ltrace-0.7.91-pm/proc.h
  #if defined(HAVE_LIBUNWIND)
  	/* libunwind address space */
  	unw_addr_space_t unwind_as;
-Only in ltrace-0.7.91-pm/: proc.h.orig
 Common subdirectories: ltrace-0.7.91/sysdeps and ltrace-0.7.91-pm/sysdeps
 Common subdirectories: ltrace-0.7.91/testsuite and ltrace-0.7.91-pm/testsuite
 diff -up ltrace-0.7.91/proc.c\~ ltrace-0.7.91/proc.c
