@@ -1,0 +1,58 @@
+From 1c468a7ce030c9a1528414d63c94530da6b61538 Mon Sep 17 00:00:00 2001
+From: Petr Machata <pmachata@redhat.com>
+Date: Tue, 3 Mar 2015 11:57:01 +0100
+Subject: [PATCH] Do not assume prefix of /usr/share in system_call_params.exp
+
+---
+ testsuite/Makefile.am                        |  2 ++
+ testsuite/ltrace.main/system_call_params.exp | 14 ++++++++------
+ 2 files changed, 10 insertions(+), 6 deletions(-)
+
+diff -up ltrace-0.7.91/testsuite/Makefile.in\~ ltrace-0.7.91/testsuite/Makefile.in
+--- ltrace-0.7.91/testsuite/Makefile.in~	2013-11-05 02:22:47.000000000 +0100
++++ ltrace-0.7.91/testsuite/Makefile.in	2015-03-06 00:13:20.164533852 +0100
+@@ -648,6 +648,7 @@
+ 	rm -f env.exp
+ 	echo set libelf_LD_LIBRARY_PATH '"$(libelf_LD_LIBRARY_PATH)"' >> $@
+ 	echo set libunwind_LD_LIBRARY_PATH '"$(libunwind_LD_LIBRARY_PATH)"' >> $@
++	echo set PREFIX '"$(prefix)"' >> $@
+ 
+ # Tell versions [3.59,3.63) of GNU make to not export all variables.
+ # Otherwise a system limit (for SysV at least) may be exceeded.
+diff --git a/testsuite/ltrace.main/system_call_params.exp b/testsuite/ltrace.main/system_call_params.exp
+index 4eade10..90d2c86 100644
+--- a/testsuite/ltrace.main/system_call_params.exp
++++ b/testsuite/ltrace.main/system_call_params.exp
+@@ -67,7 +67,8 @@ set conf [ltraceNamedSource "$dir/syscalls.conf" {
+ # system with the right prefix.  So first compile a wrapper that we
+ # use to redirect fopen calls.
+ 
+-set libfopen_so [ltraceCompile libfopen.so -ldl [ltraceSource c {
++set libfopen_so [ltraceCompile libfopen.so -ldl \
++		     [ltraceSource c [string map [list "@PREFIX@" "$PREFIX"] {
+     #define _GNU_SOURCE
+     #include <dlfcn.h>
+     #include <stdio.h>
+@@ -76,13 +77,14 @@ set libfopen_so [ltraceCompile libfopen.so -ldl [ltraceSource c {
+     FILE *
+     fopen(const char *path, const char *mode)
+     {
+-      if (strncmp(path, "/usr/share", 10) == 0)
+-	path = "/dev/null";
++	#define PATH "@PREFIX@/share"
++	if (strncmp(path, PATH, sizeof(PATH) - 1) == 0)
++	    path = "/dev/null";
+ 
+-      return ((FILE *(*)(const char *, const char *))
+-	      dlsym(RTLD_NEXT, "fopen")) (path, mode);
++	return ((FILE *(*)(const char *, const char *))
++		dlsym(RTLD_NEXT, "fopen")) (path, mode);
+     }
+-}]]
++}]]]
+ 
+ setenv LD_PRELOAD $libfopen_so
+ ltraceMatch1 [ltraceRun -L -S -F $conf -- $bin] {^open@SYS\("/some/path"} == 0
+-- 
+2.1.0
+
