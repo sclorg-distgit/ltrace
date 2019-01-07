@@ -3,7 +3,7 @@
 Summary: Tracks runtime library calls from dynamically linked executables
 Name: %{?scl_prefix}ltrace
 Version: 0.7.91
-Release: 1%{?dist}
+Release: 1.bs1%{?dist}
 URL: http://ltrace.alioth.debian.org/
 License: GPLv2+
 Group: Development/Debuggers
