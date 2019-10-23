@@ -1,0 +1,49 @@
+Patch to ensure e_machine is properly initialized in some cases where
+we attach to a running multi-threaded process.
+
+diff -rup a/proc.c b/proc.c
+--- a/proc.c	2019-02-28 17:32:50.020734842 -0500
++++ b/proc.c	2019-02-28 21:04:31.179942091 -0500
+@@ -38,6 +38,7 @@
+ #include "breakpoint.h"
+ #include "debug.h"
+ #include "fetch.h"
++#include "ltrace-elf.h"
+ #include "options.h"
+ #include "proc.h"
+ #include "value_dict.h"
+@@ -218,6 +219,21 @@ process_init(struct process *proc, const
+ 		return -1;
+ 	}
+ 
++	{
++	       struct ltelf lte;
++
++	       if (ltelf_init(&lte, filename) < 0) {
++		       process_bare_destroy(proc, 0);
++		       goto fail;
++	       }
++
++	       proc->e_machine = lte.ehdr.e_machine;
++	       proc->e_class = lte.ehdr.e_ident[EI_CLASS];
++	       get_arch_dep(proc);
++
++	       ltelf_destroy(&lte);
++       }
++
+ 	if (os_process_init(proc) < 0) {
+ 		process_bare_destroy(proc, 0);
+ 		goto fail;
+diff -rup a/sysdeps/linux-gnu/x86/fetch.c b/sysdeps/linux-gnu/x86/fetch.c
+--- a/sysdeps/linux-gnu/x86/fetch.c	2019-02-28 17:32:50.168810377 -0500
++++ b/sysdeps/linux-gnu/x86/fetch.c	2019-02-28 20:57:32.162800555 -0500
+@@ -275,6 +275,9 @@ allocate_integer(struct fetch_context *c
+ #undef HANDLE32
+ 		}
+ 
++		assert(!"Unknown machine architecture");
++		abort();
++
+ 	case POOL_RETVAL:
+ 		switch (context->ireg) {
+ #ifdef __x86_64__
